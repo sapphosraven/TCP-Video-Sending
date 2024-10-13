@@ -103,7 +103,7 @@ int main() {
             fwrite(buffer, 1, valread, fp);
         }
 
-        // Check for EOF marker or completion
+        // Check for completion
         if (valread == 0) {
             printf("[ + ] File received successfully\n");
         } else {

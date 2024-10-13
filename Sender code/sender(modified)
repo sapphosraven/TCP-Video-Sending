@@ -45,25 +45,34 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
+    printf("Starting file transfer...\n");
+
     // Send file data
     while ((n = fread(buffer, 1, BUFFER_SIZE, fp)) > 0) {
         write(sockfd, buffer, n);
     }
 
-    // Close file after sending data
-    fclose(fp);
+    printf("EOF sent.\n");
 
-    // Receive success response from server
-    char response[BUFFER_SIZE] = {0};  // Clear the buffer
-    if (read(sockfd, response, sizeof(response)) < 0) {
-        perror("read failed");
+    // Send EOF marker
+    char eof_marker = '\0';
+    write(sockfd, &eof_marker, 1);
+
+    // Receive success response
+    char response[BUFFER_SIZE];
+    ssize_t r = read(sockfd, response, sizeof(response) - 1);  // Leave space for null terminator
+    if (r > 0) {
+        response[r] = '\0';  // Null-terminate the string
+        printf("Server response: %s\n", response);
+    } else if (r == 0) {
+        printf("Server closed the connection.\n");
+    } else {
+        perror("Failed to receive response");
         exit(EXIT_FAILURE);
     }
 
-    // Print the server's response
-    printf("Server response: %s\n", response);
-
-    // Close socket
+    // Close file and socket
+    fclose(fp);
     close(sockfd);
 
     return 0;

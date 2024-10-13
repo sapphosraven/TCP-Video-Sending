@@ -61,25 +61,31 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
+    printf("Receiving file...\n");
+
     // Receive file data
     while ((valread = read(newsockfd, buffer, BUFFER_SIZE)) > 0) {
         fwrite(buffer, 1, valread, fp);
     }
 
-    // Check if socket is closed by the client (EOF)
     if (valread == 0) {
-        printf("EOF received, file transfer complete.\n");
+        printf("File transfer complete. EOF received.\n");
+        fflush(stdout);
     } else {
         perror("read failed");
         exit(EXIT_FAILURE);
     }
 
-    // Send success response to the client
+    // Send success response
     char response[] = "File received successfully";
+    printf("Sending response: %s\n", response);  // Debug message
     if (write(newsockfd, response, strlen(response)) < 0) {
         perror("write failed");
         exit(EXIT_FAILURE);
     }
+
+    printf("Response sent successfully.\n");
+    fflush(stdout);  // Ensure the response is flushed
 
     // Close file and socket
     fclose(fp);
